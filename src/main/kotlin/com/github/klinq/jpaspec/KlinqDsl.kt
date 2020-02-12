@@ -51,20 +51,24 @@ fun <Z, K, R> KProperty1<in Z, Map<K, R>>.toMapValueJoin(): FromBuilder<Z, R> = 
 fun <Z, K, R> KProperty1<in Z, Map<K, R>>.toMapValueLeftJoin(): FromBuilder<Z, R> = from<Z>().leftJoinMapValue(this)
 
 // Equality
-fun <T, R> KProperty1<in T, R?>.equal(x: R): Specification<T> = toWhere().equal(x)
+fun <T, R> KProperty1<in T, R?>.equal(x: R?): Specification<T>? = x?.let { toWhere().equal(it) }
 
 fun <T, R> WhereBuilder<T, R?>.equal(x: R): Specification<T> = spec { equal(it, x) }
 
-fun <T, R> KProperty1<in T, R?>.notEqual(x: R): Specification<T> = toWhere().notEqual(x)
+fun <T, R> KProperty1<in T, R?>.notEqual(x: R?): Specification<T>? = x?.let { toWhere().notEqual(it) }
 fun <T, R> WhereBuilder<T, R?>.notEqual(x: R): Specification<T> = spec { notEqual(it, x) }
 
 //In
-fun <T, R> KProperty1<in T, R?>.`in`(values: Collection<R>): Specification<T> = toWhere().`in`(values)
+fun <T, R> KProperty1<in T, R?>.`in`(values: Collection<R>?): Specification<T>? = values?.let { toWhere().`in`(it) }
 
 fun <T, R> WhereBuilder<T, R?>.`in`(values: Collection<R>): Specification<T> = createIn(values) { it }
 
-fun <T, R> KProperty1<in T, R?>.notIn(values: Collection<R>): Specification<T> = toWhere().notIn(values)
+fun <T, R> KProperty1<in T, R?>.notIn(values: Collection<R>?): Specification<T>? = values?.let { toWhere().notIn(values) }
 fun <T, R> WhereBuilder<T, R?>.notIn(values: Collection<R>): Specification<T> = createIn(values) { it.not() }
+
+fun <T> KProperty1<in T, Collection<*>?>.isNotEmptyOrElseItIs(value: Boolean?): Specification<T>? = value?.let {
+    return if (it) isNotEmpty() else isEmpty()
+}
 
 private fun <R, T> WhereBuilder<T, R?>.createIn(values: Collection<R>, post: (Predicate) -> Predicate): Specification<T> =
         if (values.isNotEmpty()) {
@@ -95,16 +99,16 @@ fun <T> WhereBuilder<T, Number?>.ge(x: Number) = spec { ge(it, x) }
 fun <T> KProperty1<in T, Number?>.gt(x: Number) = toWhere().gt(x)
 fun <T> WhereBuilder<T, Number?>.gt(x: Number) = spec { gt(it, x) }
 
-fun <T, R : Comparable<R>> KProperty1<in T, R?>.lessThan(x: R) = toWhere().lessThan(x)
+fun <T, R : Comparable<R>> KProperty1<in T, R?>.lessThan(x: R?) = x?.let { toWhere().lessThan(it) }
 fun <T, R : Comparable<R>> WhereBuilder<T, R?>.lessThan(x: R) = spec { lessThan<R>(it, x) }
 
-fun <T, R : Comparable<R>> KProperty1<in T, R?>.lessThanOrEqualTo(x: R) = toWhere().lessThanOrEqualTo(x)
+fun <T, R : Comparable<R>> KProperty1<in T, R?>.lessThanOrEqualTo(x: R?) = x?.let { toWhere().lessThanOrEqualTo(it) }
 fun <T, R : Comparable<R>> WhereBuilder<T, R?>.lessThanOrEqualTo(x: R) = spec { lessThanOrEqualTo<R>(it, x) }
 
-fun <T, R : Comparable<R>> KProperty1<in T, R?>.greaterThan(x: R) = toWhere().greaterThan(x)
+fun <T, R : Comparable<R>> KProperty1<in T, R?>.greaterThan(x: R?) = x?.let { toWhere().greaterThan(it) }
 fun <T, R : Comparable<R>> WhereBuilder<T, R?>.greaterThan(x: R) = spec { greaterThan<R>(it, x) }
 
-fun <T, R : Comparable<R>> KProperty1<in T, R?>.greaterThanOrEqualTo(x: R) = toWhere().greaterThanOrEqualTo(x)
+fun <T, R : Comparable<R>> KProperty1<in T, R?>.greaterThanOrEqualTo(x: R?) = x?.let { toWhere().greaterThanOrEqualTo(it) }
 fun <T, R : Comparable<R>> WhereBuilder<T, R?>.greaterThanOrEqualTo(x: R) = spec { greaterThanOrEqualTo<R>(it, x) }
 
 fun <T, R : Comparable<R>> KProperty1<in T, R?>.between(x: R, y: R) = toWhere().between(x, y)
@@ -141,17 +145,17 @@ fun <T, E, R : Collection<E>> KProperty1<in T, R?>.isNotMember(elem: E) = toWher
 fun <T, E, R : Collection<E>> WhereBuilder<T, R?>.isNotMember(elem: E) = spec { isNotMember(elem, it) }
 
 // Strings
-fun <T> KProperty1<in T, String?>.like(x: String): Specification<T> = toWhere().like(x)
+fun <T> KProperty1<in T, String?>.like(x: String?): Specification<T>? = x?.let { toWhere().like(it) }
 
 fun <T> WhereBuilder<T, String?>.like(x: String): Specification<T> = spec { like(it, x) }
 
-fun <T> KProperty1<in T, String?>.likeLower(x: String): Specification<T> = toWhere().likeLower(x)
+fun <T> KProperty1<in T, String?>.likeLower(x: String?): Specification<T>? = x?.let { toWhere().likeLower(it) }
 fun <T> WhereBuilder<T, String?>.likeLower(x: String): Specification<T> = spec { like(lower(it), x.toLowerCase()) }
 
 fun <T> KProperty1<in T, String?>.like(x: String, escapeChar: Char): Specification<T> = toWhere().like(x, escapeChar)
 fun <T> WhereBuilder<T, String?>.like(x: String, escapeChar: Char): Specification<T> = spec { like(it, x, escapeChar) }
 
-fun <T> KProperty1<in T, String?>.notLike(x: String): Specification<T> = toWhere().notLike(x)
+fun <T> KProperty1<in T, String?>.notLike(x: String?): Specification<T>? = x?.let { toWhere().notLike(x) }
 fun <T> WhereBuilder<T, String?>.notLike(x: String): Specification<T> = spec { notLike(it, x) }
 
 fun <T> KProperty1<in T, String?>.notLike(x: String, escapeChar: Char): Specification<T> = toWhere().notLike(x, escapeChar)
